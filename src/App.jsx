@@ -7,6 +7,7 @@ import EditPositionModal from './components/EditPositionModal'
 import PositionAnalysisModal from './components/PositionAnalysisModal'
 import LoginScreen from './components/LoginScreen'
 import SellRecommendationsModal from './components/SellRecommendationsModal'
+import ScreenshotImportModal from './components/ScreenshotImportModal'
 import './App.css'
 
 const API = 'http://tradeflow.ddev.site/api'
@@ -26,6 +27,7 @@ export default function App() {
   const [refreshing, setRefreshing] = useState(false)
   const [sellRecommendations, setSellRecommendations] = useState(null)
   const [loadingSellRecs, setLoadingSellRecs] = useState(false)
+  const [showScreenshotImport, setShowScreenshotImport] = useState(false)
 
   const headers = {
     'Content-Type': 'application/json',
@@ -158,7 +160,6 @@ export default function App() {
   }, [token])
 
   // Fetch sell recommendations 3 seconds after login
-  // (gives prices time to refresh first)
   useEffect(() => {
     if (!token) return
     const timer = setTimeout(() => {
@@ -186,7 +187,16 @@ export default function App() {
             </span>
           )}
           <span style={{fontSize:'12px', color:'var(--text3)', marginRight:'8px'}}>
-            {user?.name}
+           {user?.name}
+  {user?.logins_remaining !== null && user?.logins_remaining !== undefined && (
+    <span style={{
+      marginLeft:'8px',
+      color: user.logins_remaining <= 2 ? 'var(--red)' : 'var(--text3)',
+      fontSize:'11px'
+    }}>
+      ({user.logins_remaining} free login{user.logins_remaining !== 1 ? 's' : ''} left)
+    </span>
+  )}
           </span>
           <button
             className="refresh-btn"
@@ -198,6 +208,13 @@ export default function App() {
           </button>
           <button className="btn-ai" onClick={runAnalysis} disabled={analyzing}>
             {analyzing ? '⟳ Analyzing...' : '✦ AI Analysis'}
+          </button>
+          <button
+            className="btn-add"
+            style={{background:'var(--accent)'}}
+            onClick={() => setShowScreenshotImport(true)}
+          >
+            📸 Import Screenshot
           </button>
           <button className="btn-add" onClick={() => setShowAdd(true)}>+ Add Position</button>
           <button className="btn-cancel" onClick={handleLogout}>Sign Out</button>
@@ -253,6 +270,14 @@ export default function App() {
         <SellRecommendationsModal
           analysis={sellRecommendations}
           onClose={() => setSellRecommendations(null)}
+        />
+      )}
+
+      {showScreenshotImport && (
+        <ScreenshotImportModal
+          token={token}
+          onImported={fetchPositions}
+          onClose={() => setShowScreenshotImport(false)}
         />
       )}
     </div>
