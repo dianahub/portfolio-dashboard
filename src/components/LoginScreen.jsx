@@ -18,22 +18,22 @@ export default function LoginScreen({ onLogin }) {
     ? { name, email, password, password_confirmation: password }
     : { email, password }
 
-  try {
-    const res = await fetch(`http://tradeflow.ddev.site${endpoint}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(body)
-    })
-    const data = await res.json()
-
-    if (data.trial_expired) {
-      setError('Your free trial has expired (5 logins used). Contact us to upgrade.')
-      return
-    }
-
-    if (!res.ok) {
-      setError(data.message || 'Something went wrong')
-      return
+    try {
+      const res = await fetch(`https://tradeflow-production.up.railway.app${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(body)
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.message || 'Something went wrong')
+        return
+      }
+      onLogin(data.token, data.user)
+    } catch (e) {
+      setError('Could not connect to server')
+    } finally {
+      setLoading(false)
     }
 
     onLogin(data.token, data.user)

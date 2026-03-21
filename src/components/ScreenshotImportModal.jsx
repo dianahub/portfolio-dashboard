@@ -25,7 +25,7 @@ export default function ScreenshotImportModal({ token, onImported, onClose }) {
     formData.append('image', file)
 
     try {
-      const res = await fetch('http://tradeflow.ddev.site/api/portfolio/import-screenshot', {
+      const res = await fetch('https://tradeflow-production.up.railway.app/api/portfolio/import-screenshot', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
