@@ -8,7 +8,7 @@ import PositionAnalysisModal from './components/PositionAnalysisModal'
 import LoginScreen from './components/LoginScreen'
 import './App.css'
 
-const API = 'http://tradeflow.ddev.site/api'
+const API = 'https://tradeflow-production.up.railway.app'
 
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('tf_token') || null)

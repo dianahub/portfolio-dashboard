@@ -8,7 +8,7 @@ export default function PositionAnalysisModal({ position, token, onClose }) {
     async function run() {
       try {
         const res = await fetch(
-          `http://tradeflow.ddev.site/api/positions/${position.id}/analyze`,
+          `https://tradeflow-production.up.railway.app/api/positions/${position.id}/analyze`,
           {
             method: 'POST',
             headers: {

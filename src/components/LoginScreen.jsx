@@ -19,7 +19,7 @@ export default function LoginScreen({ onLogin }) {
       : { email, password }
 
     try {
-      const res = await fetch(`http://tradeflow.ddev.site${endpoint}`, {
+      const res = await fetch(`https://tradeflow-production.up.railway.app${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(body)
