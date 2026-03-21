@@ -6,6 +6,8 @@ import AIAnalysis from './components/AIAnalysis'
 import EditPositionModal from './components/EditPositionModal'
 import PositionAnalysisModal from './components/PositionAnalysisModal'
 import LoginScreen from './components/LoginScreen'
+import SellRecommendationsModal from './components/SellRecommendationsModal'
+import ScreenshotImportModal from './components/ScreenshotImportModal'
 import './App.css'
 
 const API = 'http://tradeflow.ddev.site/api'
@@ -23,6 +25,9 @@ export default function App() {
   const [editingPosition, setEditingPosition] = useState(null)
   const [analyzingPosition, setAnalyzingPosition] = useState(null)
   const [refreshing, setRefreshing] = useState(false)
+  const [sellRecommendations, setSellRecommendations] = useState(null)
+  const [loadingSellRecs, setLoadingSellRecs] = useState(false)
+  const [showScreenshotImport, setShowScreenshotImport] = useState(false)
 
   const headers = {
     'Content-Type': 'application/json',
@@ -58,6 +63,22 @@ export default function App() {
     }
   }
 
+  async function fetchSellRecommendations() {
+    setLoadingSellRecs(true)
+    try {
+      const res = await fetch(`${API}/positions/sell-recommendations`, {
+        method: 'POST',
+        headers
+      })
+      const data = await res.json()
+      setSellRecommendations(data.analysis)
+    } catch (e) {
+      console.error('Sell recommendations failed')
+    } finally {
+      setLoadingSellRecs(false)
+    }
+  }
+
   async function refreshCrypto() {
     try {
       await fetch(`${API}/prices/refresh-crypto`, { method: 'POST', headers })
@@ -70,8 +91,7 @@ export default function App() {
   async function refreshStocks() {
     setRefreshing(true)
     try {
-      const res = await fetch(`${API}/prices/refresh-stocks`, { method: 'POST', headers })
-      const data = await res.json()
+      await fetch(`${API}/prices/refresh-stocks`, { method: 'POST', headers })
       fetchPositions()
     } catch (e) {
       console.error('Stock refresh failed')
@@ -139,21 +159,44 @@ export default function App() {
     refreshStocks()
   }, [token])
 
+  // Fetch sell recommendations 3 seconds after login
+  useEffect(() => {
+    if (!token) return
+    const timer = setTimeout(() => {
+      fetchSellRecommendations()
+    }, 3000)
+    return () => clearTimeout(timer)
+  }, [token])
+
   if (!token) return <LoginScreen onLogin={handleLogin} />
 
   return (
     <div className="app">
       <header className="header">
         <div className="header-left">
-          <div className="logo">TF</div>
+          <div className="logo">SI</div>
           <div>
-            <h1>TradeFlow</h1>
-            <span className="subtitle">Portfolio Dashboard</span>
+            <h1>Sell It?</h1>
+            <span className="subtitle">Portfolio Analyzer</span>
           </div>
         </div>
         <div className="header-actions">
+          {loadingSellRecs && (
+            <span style={{fontSize:'11px', color:'var(--accent)', marginRight:'8px'}}>
+              ⟳ Analyzing portfolio...
+            </span>
+          )}
           <span style={{fontSize:'12px', color:'var(--text3)', marginRight:'8px'}}>
-            {user?.name}
+           {user?.name}
+  {user?.logins_remaining !== null && user?.logins_remaining !== undefined && (
+    <span style={{
+      marginLeft:'8px',
+      color: user.logins_remaining <= 2 ? 'var(--red)' : 'var(--text3)',
+      fontSize:'11px'
+    }}>
+      ({user.logins_remaining} free login{user.logins_remaining !== 1 ? 's' : ''} left)
+    </span>
+  )}
           </span>
           <button
             className="refresh-btn"
@@ -165,6 +208,13 @@ export default function App() {
           </button>
           <button className="btn-ai" onClick={runAnalysis} disabled={analyzing}>
             {analyzing ? '⟳ Analyzing...' : '✦ AI Analysis'}
+          </button>
+          <button
+            className="btn-add"
+            style={{background:'var(--accent)'}}
+            onClick={() => setShowScreenshotImport(true)}
+          >
+            📸 Import Screenshot
           </button>
           <button className="btn-add" onClick={() => setShowAdd(true)}>+ Add Position</button>
           <button className="btn-cancel" onClick={handleLogout}>Sign Out</button>
@@ -213,6 +263,21 @@ export default function App() {
           position={analyzingPosition}
           token={token}
           onClose={() => setAnalyzingPosition(null)}
+        />
+      )}
+
+      {sellRecommendations && (
+        <SellRecommendationsModal
+          analysis={sellRecommendations}
+          onClose={() => setSellRecommendations(null)}
+        />
+      )}
+
+      {showScreenshotImport && (
+        <ScreenshotImportModal
+          token={token}
+          onImported={fetchPositions}
+          onClose={() => setShowScreenshotImport(false)}
         />
       )}
     </div>

@@ -9,33 +9,40 @@ export default function LoginScreen({ onLogin }) {
   const [name, setName] = useState('')
 
   async function handleSubmit(e) {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
+  e.preventDefault()
+  setLoading(true)
+  setError(null)
 
-    const endpoint = isRegister ? '/api/register' : '/api/login'
-    const body = isRegister
-      ? { name, email, password, password_confirmation: password }
-      : { email, password }
+  const endpoint = isRegister ? '/api/register' : '/api/login'
+  const body = isRegister
+    ? { name, email, password, password_confirmation: password }
+    : { email, password }
 
-    try {
-      const res = await fetch(`http://tradeflow.ddev.site${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(body)
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setError(data.message || 'Something went wrong')
-        return
-      }
-      onLogin(data.token, data.user)
-    } catch (e) {
-      setError('Could not connect to server')
-    } finally {
-      setLoading(false)
+  try {
+    const res = await fetch(`http://tradeflow.ddev.site${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(body)
+    })
+    const data = await res.json()
+
+    if (data.trial_expired) {
+      setError('Your free trial has expired (5 logins used). Contact us to upgrade.')
+      return
     }
+
+    if (!res.ok) {
+      setError(data.message || 'Something went wrong')
+      return
+    }
+
+    onLogin(data.token, data.user)
+  } catch (e) {
+    setError('Could not connect to server')
+  } finally {
+    setLoading(false)
   }
+}
 
   return (
     <div style={{
@@ -55,7 +62,7 @@ export default function LoginScreen({ onLogin }) {
         <div style={{display:'flex', alignItems:'center', gap:'12px', marginBottom:'32px'}}>
           <div className="logo">TF</div>
           <div>
-            <h1 style={{fontSize:'20px', fontFamily:'var(--font-display)', fontWeight:'800'}}>TradeFlow</h1>
+            <h1 style={{fontSize:'20px', fontFamily:'var(--font-display)', fontWeight:'800'}}>Sell It?</h1>
             <span style={{fontSize:'11px', color:'var(--text3)', textTransform:'uppercase', letterSpacing:'0.08em'}}>
               {isRegister ? 'Create Account' : 'Sign In'}
             </span>
