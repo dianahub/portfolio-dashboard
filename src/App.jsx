@@ -51,11 +51,17 @@ export default function App() {
     try {
       setLoading(true)
       const res = await fetch(`${API_BASE_URL}/positions`, { headers })
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        setError(`API error ${res.status}: ${errData.message || 'Failed to fetch positions'}`)
+        return
+      }
       const data = await res.json()
       setPositions(data.positions || [])
       setSummary(data.summary || null)
     } catch (e) {
-      setError('Could not connect to API')
+      console.error('fetchPositions error:', e)
+      setError(`Could not connect to API: ${e.message}`)
     } finally {
       setLoading(false)
     }
@@ -68,10 +74,14 @@ export default function App() {
         method: 'POST',
         headers
       })
+      if (!res.ok) {
+        console.error('Sell recommendations error:', res.status)
+        return
+      }
       const data = await res.json()
       setSellRecommendations(data.analysis)
     } catch (e) {
-      console.error('Sell recommendations failed')
+      console.error('Sell recommendations failed:', e.message)
     } finally {
       setLoadingSellRecs(false)
     }
@@ -79,20 +89,24 @@ export default function App() {
 
   async function refreshCrypto() {
     try {
-      await fetch(`${API_BASE_URL}/prices/refresh-crypto`, { method: 'POST', headers })
-      fetchPositions()
+      const res = await fetch(`${API_BASE_URL}/prices/refresh-crypto`, { method: 'POST', headers })
+      if (res.ok) {
+        fetchPositions()
+      }
     } catch (e) {
-      console.error('Crypto refresh failed')
+      console.error('Crypto refresh failed:', e.message)
     }
   }
 
   async function refreshStocks() {
     setRefreshing(true)
     try {
-      await fetch(`${API_BASE_URL}/prices/refresh-stocks`, { method: 'POST', headers })
-      fetchPositions()
+      const res = await fetch(`${API_BASE_URL}/prices/refresh-stocks`, { method: 'POST', headers })
+      if (res.ok) {
+        fetchPositions()
+      }
     } catch (e) {
-      console.error('Stock refresh failed')
+      console.error('Stock refresh failed:', e.message)
     } finally {
       setRefreshing(false)
     }
@@ -100,28 +114,54 @@ export default function App() {
 
   async function deletePosition(id) {
     if (!confirm('Remove this position?')) return
-    await fetch(`${API_BASE_URL}/positions/${id}`, { method: 'DELETE', headers })
-    fetchPositions()
+    try {
+      const res = await fetch(`${API_BASE_URL}/positions/${id}`, { method: 'DELETE', headers })
+      if (!res.ok) {
+        setError(`Failed to delete: ${res.status}`)
+        return
+      }
+      fetchPositions()
+    } catch (e) {
+      setError(`Delete failed: ${e.message}`)
+    }
   }
 
   async function addPosition(data) {
-    await fetch(`${API_BASE_URL}/positions`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(data)
-    })
-    setShowAdd(false)
-    fetchPositions()
+    try {
+      const res = await fetch(`${API_BASE_URL}/positions`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(data)
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        setError(err.message || `Error: ${res.status}`)
+        return
+      }
+      setShowAdd(false)
+      fetchPositions()
+    } catch (e) {
+      setError(`Failed to add position: ${e.message}`)
+    }
   }
 
   async function savePosition(id, data) {
-    await fetch(`${API_BASE_URL}/positions/${id}`, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify(data)
-    })
-    setEditingPosition(null)
-    fetchPositions()
+    try {
+      const res = await fetch(`${API_BASE_URL}/positions/${id}`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(data)
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        setError(err.message || `Error: ${res.status}`)
+        return
+      }
+      setEditingPosition(null)
+      fetchPositions()
+    } catch (e) {
+      setError(`Failed to save position: ${e.message}`)
+    }
   }
 
   async function runAnalysis() {
@@ -143,28 +183,28 @@ export default function App() {
     if (token) fetchPositions()
   }, [token])
 
-  // Auto-refresh crypto every 5 minutes
+  // Auto-refresh crypto every 5 minutes (only after positions loaded)
   useEffect(() => {
-    if (!token) return
+    if (!token || positions.length === 0) return
     refreshCrypto()
     const interval = setInterval(refreshCrypto, 5 * 60 * 1000)
     return () => clearInterval(interval)
-  }, [token])
+  }, [token, positions.length])
 
-  // Refresh stocks once on login
+  // Refresh stocks once on login (only after positions loaded)
   useEffect(() => {
-    if (!token) return
+    if (!token || positions.length === 0) return
     refreshStocks()
-  }, [token])
+  }, [token, positions.length])
 
-  // Fetch sell recommendations 3 seconds after login
+  // Fetch sell recommendations 3 seconds after login (only after positions loaded)
   useEffect(() => {
-    if (!token) return
+    if (!token || positions.length === 0) return
     const timer = setTimeout(() => {
       fetchSellRecommendations()
     }, 3000)
     return () => clearTimeout(timer)
-  }, [token])
+  }, [token, positions.length])
 
   if (!token) return <LoginScreen onLogin={handleLogin} />
 
