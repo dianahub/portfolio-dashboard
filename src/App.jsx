@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import PositionTable from './components/PositionTable'
 import AddPositionModal from './components/AddPositionModal'
 import Summary from './components/Summary'
@@ -26,6 +26,8 @@ export default function App() {
   const [sellRecommendations, setSellRecommendations] = useState(null)
   const [loadingSellRecs, setLoadingSellRecs] = useState(false)
   const [showScreenshotImport, setShowScreenshotImport] = useState(false)
+
+  const didRefreshStocksForToken = useRef(null)
 
   const headers = {
     'Content-Type': 'application/json',
@@ -203,10 +205,12 @@ export default function App() {
 
   // Refresh stocks once on login (only after positions loaded)
   // Disabled by default due to Alpha Vantage API limits with many positions
-  // useEffect(() => {
-  //   if (!token || positions.length === 0) return
-  //   refreshStocks()
-  // }, [token, positions.length])
+  useEffect(() => {
+    if (!token || positions.length === 0) return
+    if (didRefreshStocksForToken.current === token) return
+    didRefreshStocksForToken.current = token
+    refreshStocks()
+  }, [token, positions.length])
 
   // Fetch sell recommendations 3 seconds after login (only after positions loaded)
   useEffect(() => {
