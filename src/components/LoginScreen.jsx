@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import API_BASE_URL from '../config/api'   // ← this is the only new line
 
 export default function LoginScreen({ onLogin }) {
   const [email, setEmail] = useState('')
@@ -9,40 +10,39 @@ export default function LoginScreen({ onLogin }) {
   const [name, setName] = useState('')
 
   async function handleSubmit(e) {
-  e.preventDefault()
-  setLoading(true)
-  setError(null)
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
 
-  const endpoint = isRegister ? '/api/register' : '/api/login'
-  const body = isRegister
-    ? { name, email, password, password_confirmation: password }
-    : { email, password }
+    const endpoint = isRegister ? '/api/register' : '/api/login'
+    const body = isRegister
+      ? { name, email, password, password_confirmation: password }
+      : { email, password }
 
     try {
-      const res = await fetch(`https://tradeflow-production.up.railway.app${endpoint}`, {
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Accept': 'application/json' 
+        },
         body: JSON.stringify(body)
       })
+
       const data = await res.json()
+
       if (!res.ok) {
         setError(data.message || 'Something went wrong')
         return
       }
-      onLogin(data.token, data.user)
+
+      onLogin(data.token, data.user)   // ← only called on success now
     } catch (e) {
       setError('Could not connect to server')
     } finally {
       setLoading(false)
     }
-
-    onLogin(data.token, data.user)
-  } catch (e) {
-    setError('Could not connect to server')
-  } finally {
-    setLoading(false)
   }
-}
 
   return (
     <div style={{

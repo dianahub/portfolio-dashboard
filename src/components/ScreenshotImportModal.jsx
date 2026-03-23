@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import API_BASE_URL from '../config/api'   // ← added
 
 export default function ScreenshotImportModal({ token, onImported, onClose }) {
   const [file, setFile] = useState(null)
@@ -25,7 +26,7 @@ export default function ScreenshotImportModal({ token, onImported, onClose }) {
     formData.append('image', file)
 
     try {
-      const res = await fetch('https://tradeflow-production.up.railway.app/api/portfolio/import-screenshot', {
+      const res = await fetch(`${API_BASE_URL}/api/portfolio/import-screenshot`, {   // ← fixed ✅
         method: 'POST',
         headers: {
           'Accept': 'application/json',

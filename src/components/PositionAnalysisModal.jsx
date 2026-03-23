@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import API_BASE_URL from '../config/api'   // ← added (adjust only if your folder structure is different)
 
 export default function PositionAnalysisModal({ position, token, onClose }) {
   const [analysis, setAnalysis] = useState(null)
@@ -8,7 +9,7 @@ export default function PositionAnalysisModal({ position, token, onClose }) {
     async function run() {
       try {
         const res = await fetch(
-          `https://tradeflow-production.up.railway.app/api/positions/${position.id}/analyze`,
+          `${API_BASE_URL}/api/positions/${position.id}/analyze`,   // ← fixed (now auto local + prod)
           {
             method: 'POST',
             headers: {
@@ -26,7 +27,7 @@ export default function PositionAnalysisModal({ position, token, onClose }) {
       }
     }
     run()
-  }, [])
+  }, [position.id, token])   // ← small bonus: added dependencies so it re-runs if they change
 
   return (
     <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
