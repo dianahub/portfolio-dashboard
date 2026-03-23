@@ -10,8 +10,7 @@ import SellRecommendationsModal from './components/SellRecommendationsModal'
 import ScreenshotImportModal from './components/ScreenshotImportModal'
 import './App.css'
 
-const API = 'https://tradeflow-production.up.railway.app'
-
+const API = import.meta.env.VITE_API_BASE_URL || 'https://tradeflow-production-c4ff.up.railway.app';
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('tf_token') || null)
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('tf_user') || 'null'))
