@@ -8,9 +8,8 @@ import PositionAnalysisModal from './components/PositionAnalysisModal'
 import LoginScreen from './components/LoginScreen'
 import SellRecommendationsModal from './components/SellRecommendationsModal'
 import ScreenshotImportModal from './components/ScreenshotImportModal'
-import './App.css'
+import API_BASE_URL from './config/api'   // ← added (perfect path from App.jsx)
 
-const API = import.meta.env.VITE_API_BASE_URL || 'https://tradeflow-production-c4ff.up.railway.app';
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('tf_token') || null)
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('tf_user') || 'null'))
@@ -51,7 +50,7 @@ export default function App() {
   async function fetchPositions() {
     try {
       setLoading(true)
-      const res = await fetch(`${API}/positions`, { headers })
+      const res = await fetch(`${API_BASE_URL}/positions`, { headers })
       const data = await res.json()
       setPositions(data.positions || [])
       setSummary(data.summary || null)
@@ -65,7 +64,7 @@ export default function App() {
   async function fetchSellRecommendations() {
     setLoadingSellRecs(true)
     try {
-      const res = await fetch(`${API}/positions/sell-recommendations`, {
+      const res = await fetch(`${API_BASE_URL}/positions/sell-recommendations`, {
         method: 'POST',
         headers
       })
@@ -80,7 +79,7 @@ export default function App() {
 
   async function refreshCrypto() {
     try {
-      await fetch(`${API}/prices/refresh-crypto`, { method: 'POST', headers })
+      await fetch(`${API_BASE_URL}/prices/refresh-crypto`, { method: 'POST', headers })
       fetchPositions()
     } catch (e) {
       console.error('Crypto refresh failed')
@@ -90,7 +89,7 @@ export default function App() {
   async function refreshStocks() {
     setRefreshing(true)
     try {
-      await fetch(`${API}/prices/refresh-stocks`, { method: 'POST', headers })
+      await fetch(`${API_BASE_URL}/prices/refresh-stocks`, { method: 'POST', headers })
       fetchPositions()
     } catch (e) {
       console.error('Stock refresh failed')
@@ -101,12 +100,12 @@ export default function App() {
 
   async function deletePosition(id) {
     if (!confirm('Remove this position?')) return
-    await fetch(`${API}/positions/${id}`, { method: 'DELETE', headers })
+    await fetch(`${API_BASE_URL}/positions/${id}`, { method: 'DELETE', headers })
     fetchPositions()
   }
 
   async function addPosition(data) {
-    await fetch(`${API}/positions`, {
+    await fetch(`${API_BASE_URL}/positions`, {
       method: 'POST',
       headers,
       body: JSON.stringify(data)
@@ -116,7 +115,7 @@ export default function App() {
   }
 
   async function savePosition(id, data) {
-    await fetch(`${API}/positions/${id}`, {
+    await fetch(`${API_BASE_URL}/positions/${id}`, {
       method: 'PUT',
       headers,
       body: JSON.stringify(data)
@@ -129,7 +128,7 @@ export default function App() {
     setAnalyzing(true)
     setAnalysis(null)
     try {
-      const res = await fetch(`${API}/positions/analyze`, { method: 'POST', headers })
+      const res = await fetch(`${API_BASE_URL}/positions/analyze`, { method: 'POST', headers })
       const data = await res.json()
       setAnalysis(data.analysis)
     } catch (e) {
