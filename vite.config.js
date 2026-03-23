@@ -7,11 +7,11 @@ export default defineConfig({
     port: 5173,
     host: true,
     proxy: {
-  '/api': {
-    target: 'https://tradeflow.ddev.site',
-    changeOrigin: true,
-    secure: false
-  }
-}
+      '/api': {
+        target: 'https://tradeflow.ddev.site',
+        changeOrigin: true,
+        secure: false
+      }
+    }
   }
 })

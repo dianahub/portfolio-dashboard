@@ -91,7 +91,12 @@ export default function App() {
     try {
       const res = await fetch(`${API_BASE_URL}/prices/refresh-crypto`, { method: 'POST', headers })
       if (res.ok) {
+        const data = await res.json()
+        console.log('Crypto updated:', data)
         fetchPositions()
+      } else {
+        const errData = await res.json().catch(() => ({}))
+        console.error('Crypto refresh error:', res.status, errData)
       }
     } catch (e) {
       console.error('Crypto refresh failed:', e.message)
@@ -103,7 +108,12 @@ export default function App() {
     try {
       const res = await fetch(`${API_BASE_URL}/prices/refresh-stocks`, { method: 'POST', headers })
       if (res.ok) {
+        const data = await res.json()
+        console.log('Stocks updated:', data)
         fetchPositions()
+      } else {
+        const errData = await res.json().catch(() => ({}))
+        console.error('Stock refresh error:', res.status, errData)
       }
     } catch (e) {
       console.error('Stock refresh failed:', e.message)
@@ -192,10 +202,11 @@ export default function App() {
   }, [token, positions.length])
 
   // Refresh stocks once on login (only after positions loaded)
-  useEffect(() => {
-    if (!token || positions.length === 0) return
-    refreshStocks()
-  }, [token, positions.length])
+  // Disabled by default due to Alpha Vantage API limits with many positions
+  // useEffect(() => {
+  //   if (!token || positions.length === 0) return
+  //   refreshStocks()
+  // }, [token, positions.length])
 
   // Fetch sell recommendations 3 seconds after login (only after positions loaded)
   useEffect(() => {
