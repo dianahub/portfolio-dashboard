@@ -14,7 +14,7 @@ export default function LoginScreen({ onLogin }) {
     setLoading(true)
     setError(null)
 
-    const endpoint = isRegister ? '/api/register' : '/api/login'
+    const endpoint = isRegister ? '/register' : '/login'
     const body = isRegister
       ? { name, email, password, password_confirmation: password }
       : { email, password }
