@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import PositionTable from './components/PositionTable'
 import AddPositionModal from './components/AddPositionModal'
 import Summary from './components/Summary'
@@ -27,11 +27,15 @@ export default function App() {
   const [loadingSellRecs, setLoadingSellRecs] = useState(false)
   const [showScreenshotImport, setShowScreenshotImport] = useState(false)
 
+  const didRefreshStocksForToken = useRef(null)
+
   const headers = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
     'Authorization': `Bearer ${token}`
   }
+
+  const hasStockPositions = positions.some((p) => !p.asset_type || p.asset_type === 'stock' || p.asset_type === 'etf')
 
   function handleLogin(newToken, newUser) {
     localStorage.setItem('tf_token', newToken)
@@ -207,6 +211,14 @@ export default function App() {
   //   if (!token || positions.length === 0) return
   //   refreshStocks()
   // }, [token, positions.length])
+
+  useEffect(() => {
+    if (!token || positions.length === 0) return
+    if (!hasStockPositions) return
+    if (didRefreshStocksForToken.current === token) return
+    didRefreshStocksForToken.current = token
+    refreshStocks()
+  }, [token, positions.length, hasStockPositions])
 
   // Fetch sell recommendations 3 seconds after login (only after positions loaded)
   useEffect(() => {

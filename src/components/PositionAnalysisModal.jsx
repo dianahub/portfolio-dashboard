@@ -9,16 +9,26 @@ export default function PositionAnalysisModal({ position, token, onClose }) {
     async function run() {
       try {
         const res = await fetch(
-          `${API_BASE_URL}/api/positions/${position.id}/analyze`,   // ← fixed (now auto local + prod)
+          `${API_BASE_URL}/positions/${position.id}/analyze`,
           {
             method: 'POST',
             headers: {
               'Accept': 'application/json',
+              'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`
             }
           }
         )
-        const data = await res.json()
+        const data = await res.json().catch(() => ({}))
+        if (!res.ok) {
+          const details = {
+            message: data.message || 'Request failed',
+            status: data.status,
+            raw: data.raw,
+          }
+          setAnalysis(`Analysis failed (${res.status}): ${JSON.stringify(details, null, 2)}`)
+          return
+        }
         setAnalysis(data.analysis)
       } catch (e) {
         setAnalysis('Analysis failed. Please try again.')
