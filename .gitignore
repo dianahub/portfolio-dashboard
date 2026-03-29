@@ -1,1 +1,9 @@
 .env*.local
+# Node
+node_modules/
+
+# Windows metadata files
+*.Identifier
+
+# Temp files
+*.save
