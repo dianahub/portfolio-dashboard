@@ -1,7 +1,49 @@
+import { useState } from 'react'
+
 export default function PositionTable({ positions, onDelete, onRefresh, onEdit, onAnalyze }) {
   const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(n)
   const fmtPct = (n) => `${parseFloat(n) >= 0 ? '+' : ''}${parseFloat(n).toFixed(2)}%`
   const isPos = (n) => parseFloat(n) >= 0
+
+  const [sortKey, setSortKey] = useState(null)
+  const [sortDir, setSortDir] = useState('asc')
+
+  function handleSort(key) {
+    if (sortKey === key) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortKey(key)
+      setSortDir('asc')
+    }
+  }
+
+  const sorted = [...positions].sort((a, b) => {
+    if (!sortKey) return 0
+    const av = a[sortKey]
+    const bv = b[sortKey]
+    const an = parseFloat(av)
+    const bn = parseFloat(bv)
+    let cmp
+    if (!isNaN(an) && !isNaN(bn)) {
+      cmp = an - bn
+    } else {
+      cmp = String(av ?? '').localeCompare(String(bv ?? ''))
+    }
+    return sortDir === 'asc' ? cmp : -cmp
+  })
+
+  function SortTh({ label, field }) {
+    const active = sortKey === field
+    const arrow = active ? (sortDir === 'asc' ? ' ▲' : ' ▼') : ''
+    return (
+      <th
+        onClick={() => handleSort(field)}
+        style={{ cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap' }}
+      >
+        {label}<span style={{ opacity: active ? 1 : 0.3, fontSize: '10px' }}>{arrow || ' ▲'}</span>
+      </th>
+    )
+  }
 
   if (positions.length === 0) {
     return <div className="empty">No positions found. Add one to get started.</div>
@@ -17,20 +59,20 @@ export default function PositionTable({ positions, onDelete, onRefresh, onEdit, 
         <table>
           <thead>
             <tr>
-              <th>Symbol</th>
-              <th>Qty</th>
-              <th>Avg Cost</th>
-              <th>Last</th>
-              <th>Today</th>
-              <th>Today %</th>
-              <th>Value</th>
-              <th>Total G/L</th>
-              <th>Total %</th>
+              <SortTh label="Symbol" field="symbol" />
+              <SortTh label="Qty" field="quantity" />
+              <SortTh label="Avg Cost" field="price_paid" />
+              <SortTh label="Last" field="last_price" />
+              <SortTh label="Today" field="days_gain_dollar" />
+              <SortTh label="Today %" field="change_percent" />
+              <SortTh label="Value" field="value" />
+              <SortTh label="Total G/L" field="total_gain_dollar" />
+              <SortTh label="Total %" field="total_gain_percent" />
               <th></th>
             </tr>
           </thead>
           <tbody>
-            {positions.map(p => (
+            {sorted.map(p => (
               <tr key={p.id}>
                 <td>
                   <div className="symbol-cell">
