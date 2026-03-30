@@ -238,8 +238,11 @@ export default function App() {
       days_gain_dollar:   p.days_gain_dollar,
     }))
 
-    // Delete all existing positions first, then import fresh ones
-    const currentIds = positions.map(p => p.id).filter(Boolean)
+    // Fetch current positions from API (state may be stale/empty at import time)
+    const existing = await fetch(`${API_BASE_URL}/positions`, { headers })
+      .then(r => r.ok ? r.json() : { positions: [] })
+      .catch(() => ({ positions: [] }))
+    const currentIds = (existing.positions || []).map(p => p.id).filter(Boolean)
     await Promise.allSettled(
       currentIds.map(id =>
         fetch(`${API_BASE_URL}/positions/${id}`, { method: 'DELETE', headers })
