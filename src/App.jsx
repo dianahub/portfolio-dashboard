@@ -26,6 +26,7 @@ export default function App() {
   const [sellRecommendations, setSellRecommendations] = useState(null)
   const [loadingSellRecs, setLoadingSellRecs] = useState(false)
   const [showScreenshotImport, setShowScreenshotImport] = useState(false)
+  const [pendingImport, setPendingImport] = useState(null)  // positions from extension when not logged in
 
   const didRefreshStocksForToken = useRef(null)
 
@@ -200,39 +201,63 @@ export default function App() {
   // Auto-import positions pushed by the Sell it? Chrome extension
   useEffect(() => {
     const handler = async (e) => {
-      if (!token) return  // must be logged in
       const incoming = e.detail?.positions
       if (!incoming?.length) return
 
-      // Map extension position shape → API shape
-      const mapped = incoming.map(p => ({
-        symbol:             p.symbol,
-        asset_type:         (p.asset_type || 'EQUITY').toLowerCase(),
-        quantity:           p.quantity,
-        price_paid:         p.price_paid,
-        last_price:         p.last_price,
-        value:              p.value,
-        total_gain_dollar:  p.total_gain_dollar,
-        total_gain_percent: p.total_gain_percent,
-        days_gain_dollar:   p.days_gain_dollar,
-      }))
+      if (!token) {
+        // Not logged in — save positions so we can import after login/register
+        setPendingImport(incoming)
+        return
+      }
 
-      // POST all positions in parallel, then refresh once
-      await Promise.allSettled(
-        mapped.map(pos =>
-          fetch(`${API_BASE_URL}/positions`, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(pos),
-          })
-        )
-      )
-      fetchPositions()
+      await importPositions(incoming)
     }
 
     window.addEventListener('sellit:import-positions', handler)
     return () => window.removeEventListener('sellit:import-positions', handler)
   }, [token])
+
+  // After login, import any positions that arrived before auth was ready
+  useEffect(() => {
+    if (token && pendingImport?.length) {
+      importPositions(pendingImport)
+      setPendingImport(null)
+    }
+  }, [token])
+
+  async function importPositions(incoming) {
+    const mapped = incoming.map(p => ({
+      symbol:             p.symbol,
+      asset_type:         (p.asset_type || 'EQUITY').toLowerCase(),
+      quantity:           p.quantity,
+      price_paid:         p.price_paid,
+      last_price:         p.last_price,
+      value:              p.value,
+      total_gain_dollar:  p.total_gain_dollar,
+      total_gain_percent: p.total_gain_percent,
+      days_gain_dollar:   p.days_gain_dollar,
+    }))
+
+    // Delete all existing positions first, then import fresh ones
+    const currentIds = positions.map(p => p.id).filter(Boolean)
+    await Promise.allSettled(
+      currentIds.map(id =>
+        fetch(`${API_BASE_URL}/positions/${id}`, { method: 'DELETE', headers })
+      )
+    )
+
+    await Promise.allSettled(
+      mapped.map(pos =>
+        fetch(`${API_BASE_URL}/positions`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(pos),
+        })
+      )
+    )
+
+    fetchPositions()
+  }
 
   // Auto-refresh crypto every 5 minutes (only after positions loaded)
   useEffect(() => {
@@ -266,7 +291,12 @@ export default function App() {
     return () => clearTimeout(timer)
   }, [token, positions.length])
 
-  if (!token) return <LoginScreen onLogin={handleLogin} />
+  if (!token) return (
+    <LoginScreen
+      onLogin={handleLogin}
+      pendingImport={pendingImport}
+    />
+  )
 
   return (
     <div className="app">

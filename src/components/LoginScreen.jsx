@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import API_BASE_URL from '../config/api'   // ← this is the only new line
 
-export default function LoginScreen({ onLogin }) {
+export default function LoginScreen({ onLogin, pendingImport }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [isRegister, setIsRegister] = useState(false)
+  const [isRegister, setIsRegister] = useState(!!pendingImport)  // default to register when coming from extension
   const [name, setName] = useState('')
 
   async function handleSubmit(e) {
@@ -68,6 +68,21 @@ export default function LoginScreen({ onLogin }) {
             </span>
           </div>
         </div>
+
+        {pendingImport?.length > 0 && (
+          <div style={{
+            background: 'rgba(0,212,170,0.08)',
+            border: '1px solid rgba(0,212,170,0.3)',
+            borderRadius: '8px',
+            padding: '10px 14px',
+            marginBottom: '16px',
+            fontSize: '13px',
+            color: 'var(--text2)',
+          }}>
+            {pendingImport.length} position{pendingImport.length !== 1 ? 's' : ''} ready to import from your brokerage.
+            {' '}{isRegister ? 'Create an account to save them.' : 'Sign in to import them.'}
+          </div>
+        )}
 
         {error && <div className="error" style={{marginBottom:'16px'}}>{error}</div>}
 
