@@ -315,16 +315,7 @@ export default function App() {
             </span>
           )}
           <span style={{fontSize:'12px', color:'var(--text3)', marginRight:'8px'}}>
-           {user?.name}
-  {user?.logins_remaining !== null && user?.logins_remaining !== undefined && (
-    <span style={{
-      marginLeft:'8px',
-      color: user.logins_remaining <= 2 ? 'var(--red)' : 'var(--text3)',
-      fontSize:'11px'
-    }}>
-      ({user.logins_remaining} free login{user.logins_remaining !== 1 ? 's' : ''} left)
-    </span>
-  )}
+            {user?.name}
           </span>
           <button
             className="refresh-btn"
