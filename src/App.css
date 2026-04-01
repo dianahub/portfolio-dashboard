@@ -258,6 +258,12 @@ td:first-child { text-align: left; }
 .badge-option { background: var(--accent-dim); color: var(--accent); }
 .badge-crypto { background: var(--green-dim); color: var(--green); }
 
+.option-detail {
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 0.02em;
+}
+
 .green { color: var(--green); }
 .red { color: var(--red); }
 .muted { color: var(--text2); }

@@ -46,7 +46,11 @@ export default function PositionTable({ positions, onDelete, onRefresh, onEdit, 
   }
 
   if (positions.length === 0) {
-    return <div className="empty">No positions found. Add one to get started.</div>
+    return (
+      <div className="empty">
+        No positions yet. Add them manually or navigate to your brokerage page to have them imported automatically.
+      </div>
+    )
   }
 
   return (
@@ -81,6 +85,13 @@ export default function PositionTable({ positions, onDelete, onRefresh, onEdit, 
                       {p.asset_type || 'stock'}
                       {p.option_type ? ` ${p.option_type}` : ''}
                     </span>
+                    {p.asset_type === 'option' && (p.strike_price || p.expiration_date) && (
+                      <span className="option-detail">
+                        {p.strike_price ? `$${parseFloat(p.strike_price).toFixed(2)}` : ''}
+                        {p.strike_price && p.expiration_date ? ' · ' : ''}
+                        {p.expiration_date ? new Date(p.expiration_date + 'T00:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'2-digit' }) : ''}
+                      </span>
+                    )}
                   </div>
                 </td>
                 <td className="muted">{parseFloat(p.quantity).toLocaleString()}</td>

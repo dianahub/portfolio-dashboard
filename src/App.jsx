@@ -229,7 +229,10 @@ export default function App() {
     const mapped = incoming.map(p => ({
       symbol:             p.symbol,
       asset_type:         (p.asset_type || 'EQUITY').toLowerCase(),
-      option_type:        p.option_type ?? null,
+      option_type:        p.option_type        ?? null,
+      strike_price:       p.strike_price       ?? null,
+      expiration_date:    p.expiration_date    ?? null,
+      underlying_symbol:  p.underlying_symbol  ?? null,
       quantity:           p.quantity,
       price_paid:         p.price_paid,
       last_price:         p.last_price,
