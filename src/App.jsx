@@ -11,8 +11,10 @@ import ScreenshotImportModal from './components/ScreenshotImportModal'
 import API_BASE_URL from './config/api'   // ← added (perfect path from App.jsx)
 
 export default function App() {
-  const [token, setToken] = useState(localStorage.getItem('tf_token') || null)
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem('tf_user') || 'null'))
+  // DEMO MODE: token defaults to 'demo' so the login screen is skipped.
+  // To restore real auth: change both lines back to || null and || 'null'
+  const [token, setToken] = useState(localStorage.getItem('tf_token') || 'demo')
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem('tf_user') || 'null') || { name: 'Demo' })
   const [positions, setPositions] = useState([])
   const [summary, setSummary] = useState(null)
   const [loading, setLoading] = useState(true)

@@ -26,7 +26,7 @@ export default function ScreenshotImportModal({ token, onImported, onClose }) {
     formData.append('image', file)
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/portfolio/import-screenshot`, {   // ← fixed ✅
+      const res = await fetch(`${API_BASE_URL}/portfolio/import-screenshot`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -65,8 +65,17 @@ export default function ScreenshotImportModal({ token, onImported, onClose }) {
           <button className="analysis-close" onClick={onClose} style={{fontSize:'22px'}}>×</button>
         </div>
 
+        {/* Loading overlay */}
+        {loading && (
+          <div style={{textAlign:'center', padding:'40px 0'}}>
+            <div className="spinner" style={{margin:'0 auto 16px'}} />
+            <div style={{fontSize:'14px', color:'var(--text2)'}}>Reading screenshot with AI...</div>
+            <div style={{fontSize:'12px', color:'var(--text3)', marginTop:'6px'}}>This usually takes 10–20 seconds</div>
+          </div>
+        )}
+
         {/* Upload area */}
-        {!result && (
+        {!result && !loading && (
           <>
             <label style={{
               display:'block',
