@@ -227,6 +227,18 @@ export default function App() {
     }
   }, [token])
 
+  async function clearPositions() {
+    if (!confirm('Remove all positions?')) return
+    const existing = await fetch(`${API_BASE_URL}/positions`, { headers })
+      .then(r => r.ok ? r.json() : { positions: [] })
+    await Promise.allSettled(
+      (existing.positions || []).map(p =>
+        fetch(`${API_BASE_URL}/positions/${p.id}`, { method: 'DELETE', headers })
+      )
+    )
+    fetchPositions()
+  }
+
   async function importPositions(incoming) {
     const mapped = incoming.map(p => ({
       symbol:             p.symbol,
@@ -345,6 +357,7 @@ export default function App() {
             📸 Import Screenshot
           </button>
           <button className="btn-add" onClick={() => setShowAdd(true)}>+ Add Position</button>
+          <button className="btn-cancel" onClick={clearPositions}>Clear All</button>
           <button className="btn-cancel" onClick={handleLogout}>Sign Out</button>
         </div>
       </header>
