@@ -48,7 +48,7 @@ export default function PositionTable({ positions, onDelete, onRefresh, onEdit, 
   if (positions.length === 0) {
     return (
       <div className="empty">
-        No positions yet. Add them manually or navigate to your brokerage page to have them imported automatically.
+        No positions yet. Import them from a screenshot or add them manually.
       </div>
     )
   }
