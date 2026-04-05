@@ -34,6 +34,7 @@ export default function App() {
   const [analyzingPosition, setAnalyzingPosition] = useState(null)
   const [refreshing, setRefreshing] = useState(false)
   const [sellRecommendations, setSellRecommendations] = useState(null)
+  const [sellRecsError, setSellRecsError] = useState(null)
   const [loadingSellRecs, setLoadingSellRecs] = useState(false)
   const [showSellRecs, setShowSellRecs] = useState(false)
   const [showScreenshotImport, setShowScreenshotImport] = useState(false)
@@ -99,19 +100,20 @@ export default function App() {
     setShowSellRecs(true)
     setLoadingSellRecs(true)
     setSellRecommendations(null)
+    setSellRecsError(null)
     try {
       const res = await fetch(`${API_BASE_URL}/positions/sell-recommendations`, {
         method: 'POST',
         headers
       })
+      const data = await res.json()
       if (!res.ok) {
-        console.error('Sell recommendations error:', res.status)
+        setSellRecsError(data.message || 'Something went wrong. Please try again.')
         return
       }
-      const data = await res.json()
       setSellRecommendations(data.analysis)
     } catch (e) {
-      console.error('Sell recommendations failed:', e.message)
+      setSellRecsError('Could not connect to server.')
     } finally {
       setLoadingSellRecs(false)
     }
@@ -427,6 +429,7 @@ export default function App() {
       {showSellRecs && (
         <SellRecommendationsModal
           analysis={sellRecommendations}
+          error={sellRecsError}
           loading={loadingSellRecs}
           analyzing={analyzing}
           onRunFullAnalysis={() => runAnalysis()}

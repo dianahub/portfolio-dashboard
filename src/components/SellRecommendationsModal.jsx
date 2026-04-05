@@ -1,4 +1,4 @@
-export default function SellRecommendationsModal({ analysis, loading, analyzing, onRunFullAnalysis, onClose }) {
+export default function SellRecommendationsModal({ analysis, error, loading, analyzing, onRunFullAnalysis, onClose }) {
   return (
     <div className="modal-overlay">
       <div className="modal" style={{width:'620px', maxHeight:'88vh', overflowY:'auto'}}>
@@ -43,6 +43,11 @@ export default function SellRecommendationsModal({ analysis, loading, analyzing,
             <div className="spinner" style={{margin:'0 auto 16px'}} />
             <div style={{fontSize:'14px', color:'var(--text2)'}}>Getting your sell recommendation…</div>
             <div style={{fontSize:'12px', color:'var(--text3)', marginTop:'6px'}}>This usually takes 10–15 seconds</div>
+          </div>
+        ) : error ? (
+          <div style={{textAlign:'center', padding:'30px 0'}}>
+            <div style={{fontSize:'28px', marginBottom:'12px'}}>⚠️</div>
+            <div style={{fontSize:'14px', color:'var(--text)', lineHeight:'1.6'}}>{error}</div>
           </div>
         ) : (
           <div style={{
