@@ -3,6 +3,22 @@ import API_BASE_URL from '../config/api'
 
 const params = new URLSearchParams(window.location.search)
 
+function Card({ children }) {
+  return (
+    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'var(--bg)' }}>
+      <div style={{ background:'var(--bg2)', border:'1px solid var(--border2)', borderRadius:'14px', padding:'40px', width:'380px' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:'12px', marginBottom:'28px' }}>
+          <div className="logo">TF</div>
+          <div>
+            <h1 style={{ fontSize:'20px', fontFamily:'var(--font-display)', fontWeight:'800' }}>Sell It?</h1>
+          </div>
+        </div>
+        {children}
+      </div>
+    </div>
+  )
+}
+
 export default function LoginScreen({ onLogin, pendingImport }) {
   const [email, setEmail] = useState(params.get('email') || '')
   const [password, setPassword] = useState('')
@@ -105,21 +121,6 @@ export default function LoginScreen({ onLogin, pendingImport }) {
     }
   }
 
-  // ── Shared card wrapper ──────────────────────────────────────────────────
-
-  const Card = ({ children }) => (
-    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'var(--bg)' }}>
-      <div style={{ background:'var(--bg2)', border:'1px solid var(--border2)', borderRadius:'14px', padding:'40px', width:'380px' }}>
-        <div style={{ display:'flex', alignItems:'center', gap:'12px', marginBottom:'28px' }}>
-          <div className="logo">TF</div>
-          <div>
-            <h1 style={{ fontSize:'20px', fontFamily:'var(--font-display)', fontWeight:'800' }}>Sell It?</h1>
-          </div>
-        </div>
-        {children}
-      </div>
-    </div>
-  )
 
   // ── Verify email screen ──────────────────────────────────────────────────
 
