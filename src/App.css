@@ -417,20 +417,23 @@ select option { background: var(--bg3); }
 
 .analysis-close {
   background: transparent;
-  border: none;
-  color: var(--text3);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  color: var(--text2);
   cursor: pointer;
-  font-size: 18px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
   line-height: 1;
-  padding: 0;
+  padding: 6px 10px;
 }
-.analysis-close:hover { color: var(--text); }
+.analysis-close:hover { color: var(--text); border-color: var(--text2); }
 
 .analysis-text {
-  color: var(--text2);
-  line-height: 1.7;
+  color: var(--text);
+  line-height: 1.8;
   white-space: pre-wrap;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 /* LOADING / ERROR */

@@ -11,10 +11,18 @@ import ScreenshotImportModal from './components/ScreenshotImportModal'
 import API_BASE_URL from './config/api'   // ← added (perfect path from App.jsx)
 
 export default function App() {
-  // DEMO MODE: token defaults to 'demo' so the login screen is skipped.
-  // To restore real auth: change both lines back to || null and || 'null'
-  const [token, setToken] = useState(localStorage.getItem('tf_token') || 'demo')
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem('tf_user') || 'null') || { name: 'Demo' })
+  const [token, setToken] = useState(() => {
+    const stored = localStorage.getItem('tf_token')
+    const loginTime = localStorage.getItem('tf_login_time')
+    if (stored && loginTime && Date.now() - Number(loginTime) > 24 * 60 * 60 * 1000) {
+      localStorage.removeItem('tf_token')
+      localStorage.removeItem('tf_user')
+      localStorage.removeItem('tf_login_time')
+      return null
+    }
+    return stored || null
+  })
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem('tf_user') || 'null'))
   const [positions, setPositions] = useState([])
   const [summary, setSummary] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -27,6 +35,7 @@ export default function App() {
   const [refreshing, setRefreshing] = useState(false)
   const [sellRecommendations, setSellRecommendations] = useState(null)
   const [loadingSellRecs, setLoadingSellRecs] = useState(false)
+  const [showSellRecs, setShowSellRecs] = useState(false)
   const [showScreenshotImport, setShowScreenshotImport] = useState(false)
   const [pendingImport, setPendingImport] = useState(null)  // positions from extension when not logged in
 
@@ -43,6 +52,7 @@ export default function App() {
   function handleLogin(newToken, newUser) {
     localStorage.setItem('tf_token', newToken)
     localStorage.setItem('tf_user', JSON.stringify(newUser))
+    localStorage.setItem('tf_login_time', String(Date.now()))
     setToken(newToken)
     setUser(newUser)
   }
@@ -50,9 +60,20 @@ export default function App() {
   function handleLogout() {
     localStorage.removeItem('tf_token')
     localStorage.removeItem('tf_user')
+    localStorage.removeItem('tf_login_time')
     setToken(null)
     setUser(null)
   }
+
+  // Auto-logout after 24 hours
+  useEffect(() => {
+    if (!token) return
+    const loginTime = Number(localStorage.getItem('tf_login_time') || 0)
+    const remaining = 24 * 60 * 60 * 1000 - (Date.now() - loginTime)
+    if (remaining <= 0) { handleLogout(); return }
+    const timer = setTimeout(handleLogout, remaining)
+    return () => clearTimeout(timer)
+  }, [token])
 
   async function fetchPositions() {
     try {
@@ -75,7 +96,9 @@ export default function App() {
   }
 
   async function fetchSellRecommendations() {
+    setShowSellRecs(true)
     setLoadingSellRecs(true)
+    setSellRecommendations(null)
     try {
       const res = await fetch(`${API_BASE_URL}/positions/sell-recommendations`, {
         method: 'POST',
@@ -188,8 +211,10 @@ export default function App() {
       const res = await fetch(`${API_BASE_URL}/positions/analyze`, { method: 'POST', headers })
       const data = await res.json()
       setAnalysis(data.analysis)
+      setShowSellRecs(false)
     } catch (e) {
       setAnalysis('Analysis failed. Check your API key.')
+      setShowSellRecs(false)
     } finally {
       setAnalyzing(false)
     }
@@ -303,13 +328,10 @@ export default function App() {
     refreshStocks()
   }, [token, positions.length, hasStockPositions])
 
-  // Fetch sell recommendations 3 seconds after login (only after positions loaded)
+  // Show sell recommendations as soon as positions are loaded
   useEffect(() => {
     if (!token || positions.length === 0) return
-    const timer = setTimeout(() => {
-      fetchSellRecommendations()
-    }, 3000)
-    return () => clearTimeout(timer)
+    fetchSellRecommendations()
   }, [token, positions.length])
 
   if (!token) return (
@@ -330,11 +352,6 @@ export default function App() {
           </div>
         </div>
         <div className="header-actions">
-          {loadingSellRecs && (
-            <span style={{fontSize:'11px', color:'var(--accent)', marginRight:'8px'}}>
-              ⟳ Analyzing portfolio...
-            </span>
-          )}
           <span style={{fontSize:'12px', color:'var(--text3)', marginRight:'8px'}}>
             {user?.name}
           </span>
@@ -407,17 +424,20 @@ export default function App() {
         />
       )}
 
-      {sellRecommendations && (
+      {showSellRecs && (
         <SellRecommendationsModal
           analysis={sellRecommendations}
-          onClose={() => setSellRecommendations(null)}
+          loading={loadingSellRecs}
+          analyzing={analyzing}
+          onRunFullAnalysis={() => runAnalysis()}
+          onClose={() => setShowSellRecs(false)}
         />
       )}
 
       {showScreenshotImport && (
         <ScreenshotImportModal
           token={token}
-          onImported={fetchPositions}
+          onImported={() => { fetchPositions(); setTimeout(fetchSellRecommendations, 2000) }}
           onClose={() => setShowScreenshotImport(false)}
         />
       )}

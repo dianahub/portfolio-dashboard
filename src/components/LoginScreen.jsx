@@ -8,7 +8,7 @@ export default function LoginScreen({ onLogin, pendingImport }) {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [isRegister, setIsRegister] = useState(!!pendingImport)
+  const [isRegister] = useState(false)
   const [name, setName] = useState('')
   const [needsVerification, setNeedsVerification] = useState(false)
   const [verifiedJustNow] = useState(params.get('verified') === '1')
@@ -268,20 +268,15 @@ export default function LoginScreen({ onLogin, pendingImport }) {
         </button>
       </form>
 
-      {!isRegister && (
-        <p style={{ textAlign:'center', marginTop:'12px', fontSize:'12px' }}>
-          <span onClick={() => { setIsForgot(true); setError(null) }} style={{ color:'var(--text3)', cursor:'pointer' }}>
-            Forgot password?
-          </span>
-        </p>
-      )}
-
-      <p style={{ textAlign:'center', marginTop:'10px', fontSize:'12px', color:'var(--text3)' }}>
-        {isRegister ? 'Already have an account?' : "Don't have an account?"}
-        {' '}
-        <span onClick={() => { setIsRegister(!isRegister); setError(null) }} style={{ color:'var(--accent)', cursor:'pointer' }}>
-          {isRegister ? 'Sign in' : 'Register'}
+      <p style={{ textAlign:'center', marginTop:'12px', fontSize:'12px' }}>
+        <span onClick={() => { setIsForgot(true); setError(null) }} style={{ color:'var(--text3)', cursor:'pointer' }}>
+          Forgot password?
         </span>
+      </p>
+
+      <p style={{ textAlign:'center', marginTop:'16px', fontSize:'12px', color:'var(--text3)', borderTop:'1px solid var(--border2)', paddingTop:'16px' }}>
+        Don't have an account?{' '}
+        <span style={{ color:'var(--text2)' }}>Contact Diana for a login.</span>
       </p>
     </Card>
   )
