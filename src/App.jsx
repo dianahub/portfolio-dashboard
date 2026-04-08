@@ -9,6 +9,7 @@ import LoginScreen from './components/LoginScreen'
 import SellRecommendationsModal from './components/SellRecommendationsModal'
 import ScreenshotImportModal from './components/ScreenshotImportModal'
 import ExcelImportModal from './components/ExcelImportModal'
+import AdminPage from './components/AdminPage'
 import API_BASE_URL from './config/api'   // ← added (perfect path from App.jsx)
 
 export default function App() {
@@ -40,6 +41,7 @@ export default function App() {
   const [showSellRecs, setShowSellRecs] = useState(false)
   const [showScreenshotImport, setShowScreenshotImport] = useState(false)
   const [showExcelImport, setShowExcelImport] = useState(false)
+  const [showAdmin, setShowAdmin] = useState(() => window.location.pathname === '/admin')
   const [pendingImport, setPendingImport] = useState(null)  // positions from extension when not logged in
 
   const didRefreshStocksForToken = useRef(null)
@@ -345,6 +347,14 @@ export default function App() {
     />
   )
 
+  if (showAdmin) return (
+    <AdminPage
+      token={token}
+      user={user}
+      onBack={() => setShowAdmin(false)}
+    />
+  )
+
   return (
     <div className="app">
       <header className="header">
@@ -386,6 +396,15 @@ export default function App() {
           </button>
           <button className="btn-add" onClick={() => setShowAdd(true)}>+ Add Position</button>
           <button className="btn-cancel" onClick={clearPositions}>Clear All</button>
+          {user?.is_admin && (
+            <button
+              className="btn-add"
+              style={{background:'#4a4a6a'}}
+              onClick={() => setShowAdmin(true)}
+            >
+              ⚙ Admin
+            </button>
+          )}
           <button className="btn-cancel" onClick={handleLogout}>Sign Out</button>
         </div>
       </header>
