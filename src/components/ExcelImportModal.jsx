@@ -246,14 +246,43 @@ export default function ExcelImportModal({ token, onImported, onClose }) {
               </div>
             )}
 
-            {!file && (
-              <div style={{
-                marginTop: '12px', padding: '12px', background: 'var(--bg3)',
-                borderRadius: '8px', fontSize: '11px', color: 'var(--text3)'
-              }}>
-                💡 Use the <strong>stock_portfolio.xlsx</strong> file exported from this app. All current positions will be permanently replaced.
+            {/* Required columns reference — shown before first upload and after preview */}
+            <div style={{
+              marginTop: '12px', padding: '14px 16px', background: 'var(--bg3)',
+              borderRadius: '8px', border: '1px solid var(--border1)',
+            }}>
+              <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text2)',
+                textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '10px' }}>
+                📋 Required Column Layout (Row 4 onward)
               </div>
-            )}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px 24px' }}>
+                {[
+                  ['Column B', 'Ticker symbol', true],
+                  ['Column C', 'Company name', false],
+                  ['Column D', 'Number of shares', true],
+                  ['Column E', 'Price paid / cost basis', true],
+                  ['Column F', 'Current price', true],
+                  ['Column G', 'Cost basis total', false],
+                  ['Column H', 'Current value', true],
+                  ['Column I', 'Gain / Loss ($)', true],
+                  ['Column J', 'Gain / Loss (%)', true],
+                ].map(([col, desc, required]) => (
+                  <div key={col} style={{ display: 'flex', alignItems: 'baseline', gap: '6px', fontSize: '11px' }}>
+                    <span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--accent)',
+                      minWidth: '72px', flexShrink: 0 }}>{col}</span>
+                    <span style={{ color: 'var(--text2)' }}>{desc}</span>
+                    {required
+                      ? <span style={{ color: 'var(--red)', fontWeight: 700, fontSize: '10px' }}>*</span>
+                      : <span style={{ color: 'var(--text3)', fontSize: '10px' }}>optional</span>}
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginTop: '10px', fontSize: '10px', color: 'var(--text3)', borderTop: '1px solid var(--border1)', paddingTop: '8px' }}>
+                <span style={{ color: 'var(--red)', fontWeight: 700 }}>*</span> required &nbsp;·&nbsp;
+                Rows 1–3 are treated as headers and skipped &nbsp;·&nbsp;
+                A "TOTAL" row at the bottom is ignored automatically
+              </div>
+            </div>
           </>
         )}
 
