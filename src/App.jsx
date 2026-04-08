@@ -366,7 +366,7 @@ export default function App() {
           </div>
         </div>
         <div className="header-actions">
-          <span style={{fontSize:'12px', color:'var(--text3)', marginRight:'8px'}}>
+          <span style={{fontSize:'13px', fontWeight:600, color:'var(--text1)', marginRight:'8px'}}>
             {user?.name}
           </span>
           <button

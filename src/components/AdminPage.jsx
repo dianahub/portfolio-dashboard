@@ -126,7 +126,11 @@ export default function AdminPage({ token, user, onBack }) {
         <div style={{ fontSize: '12px', color: 'var(--text3)', marginLeft: '4px' }}>
           Sellit Platform
         </div>
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text1)' }}>
+            {user?.name}
+          </span>
+        <div style={{ display: 'flex', gap: '8px' }}>
           {['prompts', 'users'].map(t => (
             <button key={t} onClick={() => { setTab(t); if (t === 'users') fetchUsers() }}
               style={{
@@ -138,6 +142,7 @@ export default function AdminPage({ token, user, onBack }) {
               {t === 'prompts' ? '⚙ Prompts' : '👥 Users'}
             </button>
           ))}
+        </div>
         </div>
       </header>
 
