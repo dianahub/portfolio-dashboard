@@ -8,6 +8,7 @@ import PositionAnalysisModal from './components/PositionAnalysisModal'
 import LoginScreen from './components/LoginScreen'
 import SellRecommendationsModal from './components/SellRecommendationsModal'
 import ScreenshotImportModal from './components/ScreenshotImportModal'
+import ExcelImportModal from './components/ExcelImportModal'
 import API_BASE_URL from './config/api'   // ← added (perfect path from App.jsx)
 
 export default function App() {
@@ -38,6 +39,7 @@ export default function App() {
   const [loadingSellRecs, setLoadingSellRecs] = useState(false)
   const [showSellRecs, setShowSellRecs] = useState(false)
   const [showScreenshotImport, setShowScreenshotImport] = useState(false)
+  const [showExcelImport, setShowExcelImport] = useState(false)
   const [pendingImport, setPendingImport] = useState(null)  // positions from extension when not logged in
 
   const didRefreshStocksForToken = useRef(null)
@@ -375,6 +377,13 @@ export default function App() {
           >
             📸 Import Screenshot
           </button>
+          <button
+            className="btn-add"
+            style={{background:'#2d6a4f'}}
+            onClick={() => setShowExcelImport(true)}
+          >
+            📊 Import Excel
+          </button>
           <button className="btn-add" onClick={() => setShowAdd(true)}>+ Add Position</button>
           <button className="btn-cancel" onClick={clearPositions}>Clear All</button>
           <button className="btn-cancel" onClick={handleLogout}>Sign Out</button>
@@ -442,6 +451,14 @@ export default function App() {
           token={token}
           onImported={() => { fetchPositions(); setTimeout(fetchSellRecommendations, 2000) }}
           onClose={() => setShowScreenshotImport(false)}
+        />
+      )}
+
+      {showExcelImport && (
+        <ExcelImportModal
+          token={token}
+          onImported={() => { fetchPositions(); setTimeout(fetchSellRecommendations, 2000) }}
+          onClose={() => setShowExcelImport(false)}
         />
       )}
     </div>
