@@ -46,6 +46,8 @@ export default function App() {
 
   const didRefreshStocksForToken = useRef(null)
 
+  const didRefreshStocksForToken = useRef(null)
+
   const headers = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -321,10 +323,12 @@ export default function App() {
 
   // Refresh stocks once on login (only after positions loaded)
   // Disabled by default due to Alpha Vantage API limits with many positions
-  // useEffect(() => {
-  //   if (!token || positions.length === 0) return
-  //   refreshStocks()
-  // }, [token, positions.length])
+  useEffect(() => {
+    if (!token || positions.length === 0) return
+    if (didRefreshStocksForToken.current === token) return
+    didRefreshStocksForToken.current = token
+    refreshStocks()
+  }, [token, positions.length])
 
   useEffect(() => {
     if (!token || positions.length === 0) return
